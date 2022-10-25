@@ -1,6 +1,12 @@
+// build:
+//      in root:
+//      g++ -o main ./tests/mine/test.cpp vector.cpp
+// Info:
+//      vsc testrunner ext is bs (stopped working unless u delete some temp files somewhere) and
+//      gcc doesnt link automatically as u d hope (guess ppl use make or build tools).
+
 #include "../../vector.h"
 // #include "vector.h"
-// #include "../../vector.cpp" // todo: idk y i need that here
 int main()
 {
     Vector vec = Vector();
