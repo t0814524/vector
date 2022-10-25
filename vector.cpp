@@ -1,4 +1,7 @@
 #include "vector.h"
+#include <stdexcept>
+// #include <iostream>
+#include <string>
 
 value_type *copy_array(value_type *arr, size_t old_size, size_t new_size)
 {
@@ -82,10 +85,72 @@ Vector::~Vector()
 
 #pragma region METHODS
 
-size_t Vector::size() const
+size_t Vector::size() const // Returns number of saved elements.
 {
     return sz;
 }
+
+bool Vector::empty() const // Returns true if the Vector is empty, otherwise false.
+{
+    return (sz == 0);
+}
+
+void Vector::clear() // Deletes all elements from Vector.
+{
+    sz = 0;
+    max_size = 1;
+    delete[] values;
+    values = new value_type[max_size];
+}
+
+void Vector::reserve(size_t n) // Capacity of the Vector is increased to n if it is not already at least this large.
+{
+    if (max_size < n)
+    {
+        max_size = n;
+        value_type *new_arr = copy_array(values, sz, max_size);
+        delete[] values;
+        values = new_arr;
+    }
+}
+
+void Vector::shrink_to_fit() // Capacity is reduced to number of elements.
+{
+    if (sz < max_size)
+    {
+        max_size = sz;
+        value_type *new_arr = copy_array(values, sz, max_size);
+        delete[] values;
+        values = new_arr;
+    }
+}
+
+void Vector::pop_back() // Removes the last element in the Vector. Throws an std::runtime_error exception if the Vector was empty.
+{
+    if (sz <= 0)
+        throw runtime_error("can't use pop_back on empty vector"); // check error msg and also if thats how u throw in cpp todo
+    sz = sz - 1;
+}
+
+value_type &Vector::operator[](size_t index) // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
+{
+    if (index < 0 || index >= sz)
+        throw runtime_error(string("index: ") + std::to_string(index) + string(" out of bounds, size is: ") + std::to_string(sz));
+    return values[index];
+}
+
+const double &Vector::operator[](size_t index) const // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
+{
+    if (index < 0 || index >= sz)
+        throw runtime_error(string("index: ") + std::to_string(index) + string(" out of bounds, size is: ") + std::to_string(sz));
+    return values[index];
+}
+
+size_t Vector::capacity() const // Returns current capacity of the Vector.
+{
+    return 999;
+}
+
 void Vector::push_back(value_type x)
 {
     // expand arr
@@ -93,11 +158,6 @@ void Vector::push_back(value_type x)
     {
         max_size *= 2;
         value_type *new_arr = copy_array(values, sz, max_size);
-        // value_type *new_arr = new value_type[max_size];
-        // for (int i = 0; i < sz; i++)
-        // {
-        //     new_arr[i] = values[i];
-        // }
         delete[] values;
         values = new_arr;
     }
