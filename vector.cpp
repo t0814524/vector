@@ -1,13 +1,14 @@
+// build:
+// cl /EHsc /std:c++17 tests/basic/utest.cpp vector.cpp
+
 #include "vector.h"
 #include <stdexcept>
-// #include <iostream>
 #include <string>
 
 value_type *copy_array(value_type *arr, size_t old_size, size_t new_size)
 {
     value_type *new_arr = new value_type[new_size];
 
-    // todo: check if that works, does potentially copy some random elements but only len of old arr. or just dont work bc sizeof ptr is only mem for the ptr
     for (int i = 0; i < old_size; i++)
     {
         {
@@ -26,56 +27,55 @@ Vector::Vector()
     values = new value_type[max_size];
 }
 
+// init with size n
+Vector::Vector(size_t n)
+{
+    sz = 0;       // number of elements in the Vector
+    max_size = 1; // maximum number of elements that are possible (capacity of the Vector)
+
+    if (n == 0)
+    {
+        values = new value_type[1]; // pointer to array with the values
+    }
+    else
+    {
+        values = new value_type[max_size]; // pointer to array with the values
+    }
+}
+
+// Returns a Vector with specified content.
+Vector::Vector(std::initializer_list<value_type> list)
+{
+    sz = max_size = list.size();
+    values = new value_type[max_size]; // pointer to array with the values
+
+    int i = 0;
+    for (const auto elem : list)
+    {
+        values[i++] = elem;
+    }
+
+    // can i directly use the initializer list ptr? or do i need to re-allocate??
+    // according to doc, initializer list is stored as an array
+    // did some research:
+    //          https://stackoverflow.com/questions/8193102/initializer-list-and-move-semantics
+    //          https://tristanbrindle.com/posts/beware-copies-initializer-list
+    //      apparently initializer list only provides const access and the elements cant be moved
+    //      its all copied in the std vector.
+    //      dont rlly understand y its designed that way...
+    // might try constructor to pass an array and take ownership
+    // conclusion:
+    //      initializer lists r inefficient
+}
+
 // copy
 Vector::Vector(const Vector &v)
 {
     sz = v.sz;             // number of elements in the Vector
     max_size = v.max_size; // maximum number of elements that are possible (capacity of the Vector)
-    // values = v.values;     // pointer, deep copy i guess
-
-    // for (int i = 0; i < sz; i++)
-    // {
-    //     values[i] = v.values[i];
-    // }
     values = copy_array(v.values, sz, max_size);
-
-    // todo: try range based loop with iterators
-    // https://www.reddit.com/r/learnprogramming/comments/pdyukg/range_loop_on_array_not_working_within_a_function/
-
-    // for (value_type elem : v.values)
-    // {
-    //     values =
-    // }
 }
 
-// init with size n
-Vector::Vector(size_t n)
-{
-    sz = 0;                            // number of elements in the Vector
-    max_size = n;                      // maximum number of elements that are possible (capacity of the Vector)
-    values = new value_type[max_size]; // pointer
-}
-
-// Returns a Vector with specified content.
-// todo
-Vector::Vector(std::initializer_list<value_type> list)
-{
-    // sz = list.size();                               // number of elements in the Vector
-    // max_size = list.size();                         // maximum number of elements that are possible (capacity of the Vector)
-    // values = new value_type[max_size];              // pointer
-    // auto *array{new value_type[list.size()]{list}}; // initializer list
-
-    // can i directly use the initializer list ptr? or do i need to re-allocate??
-    // did some research:
-    //          https://stackoverflow.com/questions/8193102/initializer-list-and-move-semantics
-    //          https://tristanbrindle.com/posts/beware-copies-initializer-list
-    //      apparently initializer list only provides const access and the elements cant be moved
-    //      its all copied in the std vector. y??
-    //      dont understand y they designed that way...
-    // might try constructor to pass an array and take ownership
-    // conclusion:
-    //      initializer lists r inefficient
-}
 Vector::~Vector()
 {
     delete[] values;
@@ -98,9 +98,12 @@ bool Vector::empty() const // Returns true if the Vector is empty, otherwise fal
 void Vector::clear() // Deletes all elements from Vector.
 {
     sz = 0;
-    max_size = 1;
-    delete[] values;
-    values = new value_type[max_size];
+    // info:
+    //      figured if u clear, you want to free the memory but
+    //      doctest basic tests doesn't want that.
+    // max_size = 1;
+    // delete[] values;
+    // values = new value_type[max_size];
 }
 
 void Vector::reserve(size_t n) // Capacity of the Vector is increased to n if it is not already at least this large.
@@ -125,30 +128,16 @@ void Vector::shrink_to_fit() // Capacity is reduced to number of elements.
     }
 }
 
+size_t Vector::capacity() const // Returns current capacity of the Vector.
+{
+    return max_size;
+}
+
 void Vector::pop_back() // Removes the last element in the Vector. Throws an std::runtime_error exception if the Vector was empty.
 {
     if (sz <= 0)
-        throw runtime_error("can't use pop_back on empty vector"); // check error msg and also if thats how u throw in cpp todo
+        throw runtime_error("can't use pop_back on empty vector");
     sz = sz - 1;
-}
-
-value_type &Vector::operator[](size_t index) // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
-{
-    if (index < 0 || index >= sz)
-        throw runtime_error(string("index: ") + std::to_string(index) + string(" out of bounds, size is: ") + std::to_string(sz));
-    return values[index];
-}
-
-const double &Vector::operator[](size_t index) const // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
-{
-    if (index < 0 || index >= sz)
-        throw runtime_error(string("index: ") + std::to_string(index) + string(" out of bounds, size is: ") + std::to_string(sz));
-    return values[index];
-}
-
-size_t Vector::capacity() const // Returns current capacity of the Vector.
-{
-    return 999;
 }
 
 void Vector::push_back(value_type x)
@@ -166,20 +155,31 @@ void Vector::push_back(value_type x)
     sz++;
 }
 
-// OUTPUT
-ostream &operator<<(ostream &o, const Vector &v)
+value_type &Vector::operator[](size_t index) // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
 {
-    return v.print(o);
+    if (index < 0 || index >= sz)
+        throw runtime_error(string("index: ") + std::to_string(index) + string(" out of bounds, size is: ") + std::to_string(sz));
+    return values[index];
 }
 
-value_type *Vector::begin()
+const double &Vector::operator[](size_t index) const // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
 {
-    return values;
+    if (index < 0 || index >= sz)
+        throw runtime_error(string("index: ") + std::to_string(index) + string(" out of bounds, size is: ") + std::to_string(sz));
+    return values[index];
 }
 
-value_type *Vector::end()
+// copy assignment overload
+const Vector &Vector::operator=(const Vector &other)
 {
-    return values + sz;
+    // no self assignment
+    if (this != &other)
+    {
+        sz = other.sz;
+        max_size = other.max_size;
+        values = copy_array(other.values, sz, max_size);
+    }
+    return *this;
 }
 
 ostream &Vector::print(ostream &o) const
@@ -199,4 +199,23 @@ ostream &Vector::print(ostream &o) const
     return o << ']';
 }
 
+// output
+ostream &operator<<(ostream &o, const Vector &v)
+{
+    return v.print(o);
+}
+
 #pragma endregion METHODS
+#pragma region ITERATOR
+
+value_type *Vector::begin()
+{
+    return values;
+}
+
+value_type *Vector::end()
+{
+    return values + sz;
+}
+
+#pragma endregion ITERATOR

@@ -1,9 +1,9 @@
-// Checks if _VECTOR_ IF DECLARED
-#ifndef _VECTOR_
+// Checks if _CUSTOM_VECTOR_ IF DECLARED
+#ifndef _CUSTOM_VECTOR_
 
-// Defines _VECTOR_ if above
+// Defines _CUSTOM_VECTOR_ if above
 // conditions fails
-#define _VECTOR_
+#define _CUSTOM_VECTOR_
 
 #include <iostream>
 using namespace std;
@@ -31,6 +31,8 @@ public:
     // todo: idk what that is
     // Copy assignment operator: The this object takes the values from the parameter. (Necessary
     // because of the use of dynamically allocated memory).
+    const Vector &operator=(const Vector &other);
+
     size_t size() const;                          // Returns number of saved elements.
     bool empty() const;                           // Returns true if the Vector is empty, otherwise false.
     void clear();                                 // Deletes all elements from Vector.
@@ -49,4 +51,4 @@ public:
 
 ostream &operator<<(ostream &o, const Vector &v);
 
-#endif // _VECTOR_
+#endif // _CUSTOM_VECTOR_
