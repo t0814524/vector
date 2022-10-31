@@ -1,29 +1,32 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
-#include "vector.h"
+#include "../../vector.h"
 
-TEST_CASE("VectorTest, CopyConstructor") {
-  const Vector v({0,1,2,3,4,5,6,7,8,9});
+TEST_CASE("VectorTest, CopyConstructor")
+{
+  const Vector v({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
   Vector other{v};
 
-  CHECK( other.size() == 10 );
-  CHECK( other.empty() == false );
+  CHECK(other.size() == 10);
+  CHECK(other.empty() == false);
 
-  for (size_t i=0;i<other.size();i++) {
+  for (size_t i = 0; i < other.size(); i++)
+  {
     CHECK(v[i] == other[i]);
   }
 
   other.pop_back();
 
-  CHECK( v.size() == other.size() + 1 );
+  CHECK(v.size() == other.size() + 1);
 }
 
-TEST_CASE("VectorTest, Assignment") {
-  const Vector a({0,1,2,3,4,5,6,7,8,9});
+TEST_CASE("VectorTest, Assignment")
+{
+  const Vector a({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
   Vector b;
   b = a;
 
-  for(size_t i=0; i < a.size(); ++i)
+  for (size_t i = 0; i < a.size(); ++i)
     CHECK(a[i] == b[i]);
 
   CHECK(a.empty() == false);
@@ -36,20 +39,23 @@ TEST_CASE("VectorTest, Assignment") {
   CHECK(b.size() == 9);
 }
 
-TEST_CASE("IteratorTest, DefaultConstructible") {
+TEST_CASE("IteratorTest, DefaultConstructible")
+{
   Vector::iterator a;
   Vector::const_iterator b;
 }
 
-TEST_CASE("IteratorTest, CopyConstructible") {
-  Vector v({1,2});
+TEST_CASE("IteratorTest, CopyConstructible")
+{
+  Vector v({1, 2});
   Vector::iterator a{v.begin()};
   Vector::iterator b{a};
   CHECK_EQ(a, b);
 }
 
-TEST_CASE("IteratorTest, CopyAssignable") {
-  Vector v({1,2});
+TEST_CASE("IteratorTest, CopyAssignable")
+{
+  Vector v({1, 2});
   Vector::iterator a{v.begin()};
   Vector::iterator b{v.end()};
   CHECK_NE(a, b);
@@ -57,7 +63,8 @@ TEST_CASE("IteratorTest, CopyAssignable") {
   CHECK_EQ(a, b);
 }
 
-TEST_CASE("IteratorTest, PreIncrement") {
+TEST_CASE("IteratorTest, PreIncrement")
+{
   Vector v({1});
   Vector::iterator a{v.begin()};
   Vector::iterator b{v.end()};
@@ -65,7 +72,8 @@ TEST_CASE("IteratorTest, PreIncrement") {
   CHECK_EQ(++a, b);
 }
 
-TEST_CASE("IteratorTest, PostIncrement") {
+TEST_CASE("IteratorTest, PostIncrement")
+{
   Vector v({1});
   Vector::iterator a{v.begin()};
   Vector::iterator b{v.end()};
@@ -74,11 +82,13 @@ TEST_CASE("IteratorTest, PostIncrement") {
   CHECK_EQ(a, b);
 }
 
-TEST_CASE("IteratorTest, Dereference") {
-  Vector v({0,1,2,3,4});
+TEST_CASE("IteratorTest, Dereference")
+{
+  Vector v({0, 1, 2, 3, 4});
   {
     size_t cnt = 0;
-    for(auto it = v.begin(); it != v.end(); ++it) {
+    for (auto it = v.begin(); it != v.end(); ++it)
+    {
       CHECK_EQ(*it, cnt++);
     }
     CHECK_EQ(cnt, 5);
@@ -89,13 +99,15 @@ TEST_CASE("IteratorTest, Dereference") {
   CHECK_EQ(*it, 999);
 }
 
-TEST_CASE("IteratorTest, ArrowOperator") {
-  Vector v({0,1,2,3,4});
+TEST_CASE("IteratorTest, ArrowOperator")
+{
+  Vector v({0, 1, 2, 3, 4});
   Vector::iterator a{v.begin()};
   Vector::iterator b{v.end()};
   {
     size_t cnt = 0;
-    for(auto it = v.begin(); it != v.end(); ++it) {
+    for (auto it = v.begin(); it != v.end(); ++it)
+    {
       CHECK_EQ(*(it.operator->()), cnt++);
     }
     CHECK_EQ(cnt, 5);
@@ -105,15 +117,17 @@ TEST_CASE("IteratorTest, ArrowOperator") {
 /**
  * ConstIterator
  */
-TEST_CASE("ConstIteratorTest, CopyConstructible") {
-  Vector v({1,2});
+TEST_CASE("ConstIteratorTest, CopyConstructible")
+{
+  Vector v({1, 2});
   Vector::const_iterator a{v.begin()};
   Vector::const_iterator b{a};
   CHECK_EQ(a, b);
 }
 
-TEST_CASE("ConstIteratorTest, CopyAssignable") {
-  Vector v({1,2});
+TEST_CASE("ConstIteratorTest, CopyAssignable")
+{
+  Vector v({1, 2});
   Vector::const_iterator a{v.begin()};
   Vector::const_iterator b{v.end()};
   CHECK_NE(a, b);
@@ -121,7 +135,8 @@ TEST_CASE("ConstIteratorTest, CopyAssignable") {
   CHECK_EQ(a, b);
 }
 
-TEST_CASE("ConstIteratorTest, PreIncrement") {
+TEST_CASE("ConstIteratorTest, PreIncrement")
+{
   Vector v({1});
   Vector::const_iterator a{v.begin()};
   Vector::const_iterator b{v.end()};
@@ -129,7 +144,8 @@ TEST_CASE("ConstIteratorTest, PreIncrement") {
   CHECK_EQ(++a, b);
 }
 
-TEST_CASE("ConstIteratorTest, PostIncrement") {
+TEST_CASE("ConstIteratorTest, PostIncrement")
+{
   Vector v({1});
   Vector::const_iterator a{v.begin()};
   Vector::const_iterator b{v.end()};
@@ -138,55 +154,61 @@ TEST_CASE("ConstIteratorTest, PostIncrement") {
   CHECK_EQ(a, b);
 }
 
-TEST_CASE("ConstIteratorTest, Dereference") {
-  Vector v({0,1,2,3,4});
+TEST_CASE("ConstIteratorTest, Dereference")
+{
+  Vector v({0, 1, 2, 3, 4});
   Vector::const_iterator beg{v.begin()};
   Vector::const_iterator end{v.end()};
   {
     size_t cnt = 0;
-    for(; beg != end; ++beg) {
+    for (; beg != end; ++beg)
+    {
       CHECK_EQ(*beg, cnt++);
     }
     CHECK_EQ(cnt, 5);
   }
 }
 
-TEST_CASE("ConstIteratorTest, ArrowOperator") {
-  Vector v({0,1,2,3,4});
+TEST_CASE("ConstIteratorTest, ArrowOperator")
+{
+  Vector v({0, 1, 2, 3, 4});
   Vector::const_iterator beg{v.begin()};
   Vector::const_iterator end{v.end()};
   {
     size_t cnt = 0;
-    for(; beg != end; ++beg) {
+    for (; beg != end; ++beg)
+    {
       CHECK_EQ(*(beg.operator->()), cnt++);
     }
     CHECK_EQ(cnt, 5);
   }
 }
 
-TEST_CASE("IteratorTest, TypeConversion") {
+TEST_CASE("IteratorTest, TypeConversion")
+{
   Vector v({1});
   Vector::iterator it{v.begin()};
   Vector::const_iterator cit{it};
 
-  //call Vector::const_iterator's operators
+  // call Vector::const_iterator's operators
   CHECK(!(cit != it));
-  CHECK(  cit == it);
+  CHECK(cit == it);
 
-  //call Vector::iterator's operators
+  // call Vector::iterator's operators
   CHECK(!(it != cit));
-  CHECK(  it == cit);
+  CHECK(it == cit);
 }
 
-TEST_CASE("IteratorTest, Insert/Erase") {
-  Vector v{1,2,3};
-  auto x = v.insert(++v.begin(),4);
-  CHECK_EQ(v[1],4);
-  CHECK_EQ(*x,4);
-  auto it =v.begin();
+TEST_CASE("IteratorTest, Insert/Erase")
+{
+  Vector v{1, 2, 3};
+  auto x = v.insert(++v.begin(), 4);
+  CHECK_EQ(v[1], 4);
+  CHECK_EQ(*x, 4);
+  auto it = v.begin();
   ++it;
   ++it;
   auto y = v.erase(it);
-  CHECK_EQ(*y,3);
-  CHECK_EQ(v[2],3);
+  CHECK_EQ(*y, 3);
+  CHECK_EQ(v[2], 3);
 }

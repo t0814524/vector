@@ -1,8 +1,9 @@
-#include<iostream>
-#include"vector.h"
+#include <iostream>
+#include "../../vector.h"
 using namespace std;
 
-int main() {
+int main()
+{
 
   [[maybe_unused]] Vector::value_type val;
   [[maybe_unused]] Vector::size_type size;
