@@ -247,6 +247,7 @@ Vector::Iterator::Iterator() // Returns an iterator on nullptr.
 {
     // todo: idk what return supposed to mean...
     ptr = nullptr;
+    dereferencable = incrementable = false;
 }
 Vector::Iterator::Iterator(pointer ptr) : ptr{ptr} {} // Returns an iterator which sets the instance variable to ptr.
 
@@ -275,7 +276,10 @@ bool Vector::Iterator::operator!=(const const_iterator &it) const // Compares th
 }
 Vector::iterator &Vector::Iterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
 {
-    ++ptr;
+    if (ptr != Vector::end())
+    {
+        ++ptr;
+    }
     return *this;
 }
 Vector::iterator Vector::Iterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
