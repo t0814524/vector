@@ -1,5 +1,19 @@
-// build:
+// build (only compiler n options that worked):
+// also start vsc from developer cmd to be able to use 'cl'
 // cl /EHsc /std:c++17 tests/basic/utest.cpp vector.cpp
+
+// stuff von pr1 folien:
+//  fn:
+//      for min, max, avg...
+//      insert, erase
+//      find(pattern)
+// operator
+//      >> (cin)
+//      +
+// template
+
+// von pr2:
+//  template to combine Iterator and ConstIterator
 
 #include "vector.h"
 #include <stdexcept>
@@ -9,7 +23,7 @@ value_type *copy_array(value_type *arr, size_t old_size, size_t new_size)
 {
     value_type *new_arr = new value_type[new_size];
 
-    for (int i = 0; i < old_size; i++)
+    for (int i = 0; i < old_size; ++i)
     {
         {
             new_arr[i] = arr[i];
@@ -186,7 +200,7 @@ ostream &Vector::print(ostream &o) const
 {
     // ostream &temp = "";
     o << "[";
-    for (int i = 0; i < sz; i++)
+    for (int i = 0; i < sz; ++i)
     {
         {
             o << values[i];
@@ -208,14 +222,143 @@ ostream &operator<<(ostream &o, const Vector &v)
 #pragma endregion METHODS
 #pragma region ITERATOR
 
-value_type *Vector::begin()
+Vector::iterator Vector::begin()
 {
-    return values;
+    return iterator(values);
 }
 
-value_type *Vector::end()
+Vector::iterator Vector::end()
 {
-    return values + sz;
+    return iterator(values + sz);
+}
+
+Vector::const_iterator Vector::begin() const
+{
+    // todo: y does that count as Iterator
+    return iterator(values);
+}
+
+Vector::const_iterator Vector::end() const
+{
+    return Iterator(values + sz);
+}
+
+Vector::Iterator::Iterator() // Returns an iterator on nullptr.
+{
+    // todo: idk what return supposed to mean...
+    ptr = nullptr;
+}
+Vector::Iterator::Iterator(pointer ptr) : ptr{ptr} {} // Returns an iterator which sets the instance variable to ptr.
+
+// todo: check if const is necessary
+Vector::Iterator::reference Vector::Iterator::operator*() const // Returns the value of the value referenced by ptr.
+{
+    return *ptr;
+}
+Vector::Iterator::pointer Vector::Iterator::operator->() const // Returns a pointer to the referenced value.
+{
+    // todo: should the ptr be a copy?
+    return ptr;
+}
+bool Vector::Iterator::operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
+{
+    // todo: can this be done nicer? would use -> if it would work without param. also if its supposed to be (*ptr).sth its wrong
+    // return (this->ptr == &*it);
+    // probably like this:
+    return ptr == it.operator->();
+}
+bool Vector::Iterator::operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
+{
+    // todo
+    // return ptr == it.operator->();
+    return !this->operator==(it);
+}
+Vector::iterator &Vector::Iterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
+{
+    ++ptr;
+    return *this;
+}
+Vector::iterator Vector::Iterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
+{
+    Vector::iterator pre = ptr++;
+    return pre;
+}
+// todo: vecror::???
+Vector::Iterator::operator Vector::const_iterator() const // (Type conversion) Allows to convert Iterator to ConstIterator
+{
+    return ConstIterator(ptr);
+}
+
+Vector::iterator Vector::insert(const_iterator pos, const_reference val)
+{
+    auto diff = pos - begin();
+    if (diff < 0 || static_cast<size_type>(diff) > sz)
+        throw std::runtime_error("Iteratoroutofbounds");
+    size_type current{static_cast<size_type>(diff)};
+    if (sz >= max_size)
+        reserve(max_size * 2); // Attentionspecialcase,ifnominimumsizeisdefined
+    for (auto i{sz}; i-- > current;)
+        values[i + 1] = values[i];
+    values[current] = val;
+    ++sz;
+    return iterator{values + current};
+}
+Vector::iterator Vector::erase(const_iterator pos)
+{
+    auto diff = pos - begin();
+    if (diff < 0 || static_cast<size_type>(diff) >= sz)
+        throw std::runtime_error("Iteratoroutofbounds");
+    size_type current{static_cast<size_type>(diff)};
+    for (auto i{current}; i < sz - 1; ++i)
+        values[i] = values[i + 1];
+    --sz;
+    return iterator{values + current};
+}
+
+// todo: vector:: on operator??
+Vector::difference_type operator-(const Vector::ConstIterator &lop,
+                                  const Vector::ConstIterator &rop)
+{
+    return lop.ptr - rop.ptr;
 }
 
 #pragma endregion ITERATOR
+
+#pragma region CONSTITERATOR
+Vector::ConstIterator::ConstIterator() // Returns a ConstIterator on nullptr.
+{
+    ptr = nullptr;
+}
+Vector::ConstIterator::ConstIterator(pointer ptr) : ptr{ptr} {} // Returns a ConstIterator which sets the instance variable to ptr.
+
+Vector::ConstIterator::reference Vector::ConstIterator::operator*() const // Returns the value of the value referenced by ptr.
+{
+    return *ptr;
+}
+Vector::ConstIterator::pointer Vector::ConstIterator::operator->() const // Returns a pointer to the referenced value.
+{
+    return ptr;
+}
+bool Vector::ConstIterator::operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
+{
+    return ptr == it.operator->();
+}
+bool Vector::ConstIterator::operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
+{
+    return !this->operator==(it);
+}
+Vector::const_iterator &Vector::ConstIterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
+{
+    ++ptr;
+    return *this;
+}
+Vector::const_iterator Vector::ConstIterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
+{
+    // todo: research:
+    //  sufficient to return ptr or should it be a instance of the cls
+    //  class init w constructor or set value. guess constructor
+    Vector::const_iterator pre(ptr++);
+    return pre;
+}
+
+#pragma endregion CONSTITERATOR

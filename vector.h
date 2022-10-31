@@ -12,6 +12,20 @@ using value_type = double; // this will make it easier to transition to template
 
 class Vector
 {
+    // iterator stuff
+public:
+    class ConstIterator;
+    class Iterator;
+    using value_type = double;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using reference = value_type &;
+    using const_reference = const value_type &;
+    using pointer = value_type *;
+    using const_pointer = const value_type *;
+    using iterator = Vector::Iterator;
+    using const_iterator = Vector::ConstIterator;
+
 private:
     size_t sz;          // number of elements in the Vector
     size_t max_size;    // maximum number of elements that are possible (capacity of the Vector)
@@ -28,7 +42,6 @@ public:
     // todo: test valgrind and test special cases like Vector(0) and Vector({})
     ~Vector(); // destructor
 
-    // todo: idk what that is
     // Copy assignment operator: The this object takes the values from the parameter. (Necessary
     // because of the use of dynamically allocated memory).
     const Vector &operator=(const Vector &other);
@@ -45,8 +58,69 @@ public:
     size_t capacity() const;                      // Returns current capacity of the Vector.
     ostream &print(ostream &o) const;
 
-    value_type *begin();
-    value_type *end();
+    // iterator
+    iterator begin();
+    iterator end();
+    const_iterator begin() const;
+    const_iterator end() const;
+
+    iterator erase(const_iterator pos);
+    iterator insert(const_iterator pos, const_reference val);
+
+    class Iterator
+    {
+    public:
+        using value_type = Vector::value_type;
+        using reference = Vector::reference;
+        using pointer = Vector::pointer;
+        using difference_type = Vector::difference_type;
+        using iterator_category = std::forward_iterator_tag;
+
+    private:
+        pointer ptr; // Points to an element in Vector.
+        bool incrementable;
+        bool dereferencable;
+
+    public:
+        Iterator();            // Returns an iterator on nullptr.
+        Iterator(pointer ptr); // Returns an iterator which sets the instance variable to ptr.
+
+        // todo: check if const is necessary
+        reference operator*() const;                     // Returns the value of the value referenced by ptr.
+        pointer operator->() const;                      // Returns a pointer to the referenced value.
+        bool operator==(const const_iterator &it) const; // Compares the pointers for equality. (A global function may be a better choice).
+        bool operator!=(const const_iterator &it) const; // Compares the pointers for inequality. (A global function may be a better choice).
+        iterator &operator++();                          // (Prefix) Iterator points to next element and (a reference to it) is returned.
+        iterator operator++(int);                        // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
+        operator const_iterator() const;                 // (Type conversion) Allows to convert Iterator to ConstIterator
+    };
+
+    class ConstIterator
+    {
+    public:
+        using value_type = Vector::value_type;
+        using reference = Vector::const_reference;
+        using pointer = Vector::const_pointer;
+        using difference_type = Vector::difference_type;
+        using iterator_category = std::forward_iterator_tag;
+
+    private:
+        pointer ptr; // Points to an element in Vector.
+
+    public:
+        ConstIterator();            // Returns a ConstIterator on nullptr.
+        ConstIterator(pointer ptr); // Returns a ConstIterator which sets the instance variable to ptr.
+
+        reference operator*() const;                   // Returns the value of the value referenced by ptr.
+        pointer operator->() const;                    // Returns a pointer to the referenced value.
+        bool operator==(const const_iterator &) const; // Compares the pointers for equality. (A global function may be a better choice).
+        bool operator!=(const const_iterator &) const; // Compares the pointers for inequality. (A global function may be a better choice).
+        const_iterator &operator++();                  // (Prefix) Iterator points to next element and (a reference to it) is returned.
+        const_iterator operator++(int);                // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
+
+        friend Vector::difference_type operator-(const Vector::ConstIterator &lop,
+                                                 const Vector::ConstIterator &rop);
+    };
 };
 
 ostream &operator<<(ostream &o, const Vector &v);
