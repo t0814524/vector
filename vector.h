@@ -1,6 +1,10 @@
 // Checks if _CUSTOM_VECTOR_ IF DECLARED
 #ifndef _CUSTOM_VECTOR_
 
+// info for this bs commit:
+//  what this exercise wants is probably way simpler than im thinking, doesnt rlly make sense as it is no real improvement and only covers some cases
+//  otherwise the predefined constructor prototypes would need to be changed
+
 // Defines _CUSTOM_VECTOR_ if above
 // conditions fails
 #define _CUSTOM_VECTOR_
@@ -80,10 +84,11 @@ public:
         pointer ptr; // Points to an element in Vector.
         bool incrementable;
         bool dereferencable;
+        Vector &vec;
 
     public:
-        Iterator();            // Returns an iterator on nullptr.
-        Iterator(pointer ptr); // Returns an iterator which sets the instance variable to ptr.
+        Iterator();                       // Returns an iterator on nullptr.
+        Iterator(pointer ptr, Vector &v); // Returns an iterator which sets the instance variable to ptr.
 
         // todo: check if const is necessary
         reference operator*() const;                     // Returns the value of the value referenced by ptr.
@@ -106,10 +111,11 @@ public:
 
     private:
         pointer ptr; // Points to an element in Vector.
+        const Vector &vec;
 
     public:
-        ConstIterator();            // Returns a ConstIterator on nullptr.
-        ConstIterator(pointer ptr); // Returns a ConstIterator which sets the instance variable to ptr.
+        ConstIterator();                             // Returns a ConstIterator on nullptr.
+        ConstIterator(pointer ptr, const Vector &v); // Returns a ConstIterator which sets the instance variable to ptr.
 
         reference operator*() const;                   // Returns the value of the value referenced by ptr.
         pointer operator->() const;                    // Returns a pointer to the referenced value.

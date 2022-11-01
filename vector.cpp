@@ -220,36 +220,38 @@ ostream &operator<<(ostream &o, const Vector &v)
 }
 
 #pragma endregion METHODS
-#pragma region ITERATOR
-
 Vector::iterator Vector::begin()
 {
-    return iterator(values);
+    return iterator(values, *this);
 }
 
 Vector::iterator Vector::end()
 {
-    return iterator(values + sz);
+    return iterator(values + sz, *this);
 }
 
 Vector::const_iterator Vector::begin() const
 {
     // todo: y does that count as Iterator
-    return iterator(values);
+    return const_iterator(values, *this);
 }
 
 Vector::const_iterator Vector::end() const
 {
-    return Iterator(values + sz);
+    return const_iterator(values + sz, *this);
 }
+
+#pragma region ITERATOR
 
 Vector::Iterator::Iterator() // Returns an iterator on nullptr.
 {
     // todo: idk what return supposed to mean...
     ptr = nullptr;
     dereferencable = incrementable = false;
+    // todo ; how??
+    vec = nullptr;
 }
-Vector::Iterator::Iterator(pointer ptr) : ptr{ptr} {} // Returns an iterator which sets the instance variable to ptr.
+Vector::Iterator::Iterator(pointer ptr, Vector &v) : ptr{ptr}, vec{v} {} // Returns an iterator which sets the instance variable to ptr.
 
 // todo: check if const is necessary
 Vector::Iterator::reference Vector::Iterator::operator*() const // Returns the value of the value referenced by ptr.
@@ -276,15 +278,19 @@ bool Vector::Iterator::operator!=(const const_iterator &it) const // Compares th
 }
 Vector::iterator &Vector::Iterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
 {
-    if (ptr != Vector::end())
+    if (ptr != vec.end().ptr)
     {
         ++ptr;
+    }
+    else
+    {
+        throw runtime_error("increment ptr past end")
     }
     return *this;
 }
 Vector::iterator Vector::Iterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
 {
-    Vector::iterator pre = ptr++;
+    Vector::iterator pre(ptr++, this->vec);
     return pre;
 }
 // todo: vecror::???
@@ -305,7 +311,7 @@ Vector::iterator Vector::insert(const_iterator pos, const_reference val)
         values[i + 1] = values[i];
     values[current] = val;
     ++sz;
-    return iterator{values + current};
+    return iterator{values + current, *this};
 }
 Vector::iterator Vector::erase(const_iterator pos)
 {
@@ -316,7 +322,7 @@ Vector::iterator Vector::erase(const_iterator pos)
     for (auto i{current}; i < sz - 1; ++i)
         values[i] = values[i + 1];
     --sz;
-    return iterator{values + current};
+    return iterator{values + current, *this};
 }
 
 // todo: vector:: on operator??
@@ -333,7 +339,7 @@ Vector::ConstIterator::ConstIterator() // Returns a ConstIterator on nullptr.
 {
     ptr = nullptr;
 }
-Vector::ConstIterator::ConstIterator(pointer ptr) : ptr{ptr} {} // Returns a ConstIterator which sets the instance variable to ptr.
+Vector::ConstIterator::ConstIterator(pointer ptr, const Vector &v) : ptr{ptr}, vec{v} {} // Returns a ConstIterator which sets the instance variable to ptr.
 
 Vector::ConstIterator::reference Vector::ConstIterator::operator*() const // Returns the value of the value referenced by ptr.
 {
