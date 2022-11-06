@@ -222,82 +222,132 @@ ostream &operator<<(ostream &o, const Vector &v)
 #pragma endregion METHODS
 Vector::iterator Vector::begin()
 {
-    return iterator(values, *this);
+    // todo:
+    return iterator(values);
 }
 
 Vector::iterator Vector::end()
 {
-    return iterator(values + sz, *this);
+    // todotodo: y is constiterator throwing err but iteratorn not???
+    return iterator(values + sz, false, false, this);
 }
 
 Vector::const_iterator Vector::begin() const
 {
     // todo: y does that count as Iterator
-    return const_iterator(values, *this);
+
+    bool inc = true;
+    // // todo
+    // // prevent increment of empty todo
+    // // prevent increment of vec with 1 elem. values -> first, (values + sz) -> end
+
+    // // todo should it pint to end>>>>????
+    // if (values + 1 == values + sz)
+    // // if (values + 1 != values + sz)
+    // {
+    //     inc = false;
+    // }
+    return const_iterator(values);
+
+    // return const_iterator(values, (sz > 0), inc, this);
 }
 
 Vector::const_iterator Vector::end() const
 {
-    return const_iterator(values + sz, *this);
+    return const_iterator(values + sz, false, false, this);
 }
 
 #pragma region ITERATOR
 
-Vector::Iterator::Iterator() // Returns an iterator on nullptr.
+// Returns an iterator on nullptr.
+Vector::Iterator::Iterator() : ptr{nullptr},
+                               dereferencable{false},
+                               incrementable{false} {}
+
+// Returns an iterator which sets the instance variable to ptr.
+Vector::Iterator::Iterator(pointer ptr) : ptr{ptr},
+                                          dereferencable{true},
+                                          incrementable{true}
 {
-    // todo: idk what return supposed to mean...
-    ptr = nullptr;
-    dereferencable = incrementable = false;
-    // todo ; how??
-    vec = nullptr;
+    cout << "iter constr called";
 }
-Vector::Iterator::Iterator(pointer ptr, Vector &v) : ptr{ptr}, vec{v} {} // Returns an iterator which sets the instance variable to ptr.
+
+// Returns a "safe" iterator with boundary and deref checks.
+// todo: y const vector
+Vector::Iterator::Iterator(pointer ptr, bool incrementable, bool dereferencable, const Vector *vec) : ptr{ptr},
+                                                                                                      incrementable{incrementable},
+                                                                                                      dereferencable{dereferencable}
+{
+    cout << "iter full constr called";
+}
 
 // todo: check if const is necessary
 Vector::Iterator::reference Vector::Iterator::operator*() const // Returns the value of the value referenced by ptr.
 {
+    cout << "iter_operator*  ";
+    cout << "dereferencable ";
+    cout << dereferencable;
+    cout << " incrementable ";
+    cout << incrementable;
+    if (!dereferencable)
+        throw runtime_error("iterator is not dereferencable");
     return *ptr;
 }
+// should throw on end (utest_secure_iterators 63)
 Vector::Iterator::pointer Vector::Iterator::operator->() const // Returns a pointer to the referenced value.
 {
-    // todo: should the ptr be a copy?
-    return ptr;
+    // todo: should the ptr be a copy? think so
+    if (!dereferencable)
+        throw runtime_error("iterator is not dereferencable");
+    return &*ptr;
 }
+
 bool Vector::Iterator::operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
 {
-    // todo: can this be done nicer? would use -> if it would work without param. also if its supposed to be (*ptr).sth its wrong
+    cout << "compare iter ";
+    cout << "dereferencable ";
+    cout << dereferencable;
+    cout << " incrementable ";
+    cout << incrementable;
     // return (this->ptr == &*it);
     // probably like this:
-    return ptr == it.operator->();
+    cout << "operator== iterator";
+
+    return ptr == it.get_ptr_unsafe();
 }
+
 bool Vector::Iterator::operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
 {
-    // todo
-    // return ptr == it.operator->();
     return !this->operator==(it);
 }
+
 Vector::iterator &Vector::Iterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
 {
-    if (ptr != vec.end().ptr)
+    if (incrementable)
     {
         ++ptr;
     }
-    else
-    {
-        throw runtime_error("increment ptr past end")
-    }
+    // utest expects no increment and no throw
+    // else
+    //     throw runtime_error("ptr not incrementable");
+
     return *this;
 }
+
 Vector::iterator Vector::Iterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
 {
-    Vector::iterator pre(ptr++, this->vec);
+    Vector::iterator pre = Vector::iterator(incrementable ? ptr++ : ptr);
     return pre;
+    // todo: keep track of size
 }
+
 // todo: vecror::???
 Vector::Iterator::operator Vector::const_iterator() const // (Type conversion) Allows to convert Iterator to ConstIterator
 {
-    return ConstIterator(ptr);
+    return ConstIterator(ptr, incrementable, dereferencable, vec);
 }
+
+#pragma endregion ITERATOR
 
 Vector::iterator Vector::insert(const_iterator pos, const_reference val)
 {
@@ -311,8 +361,9 @@ Vector::iterator Vector::insert(const_iterator pos, const_reference val)
         values[i + 1] = values[i];
     values[current] = val;
     ++sz;
-    return iterator{values + current, *this};
+    return iterator{values + current};
 }
+
 Vector::iterator Vector::erase(const_iterator pos)
 {
     auto diff = pos - begin();
@@ -322,7 +373,7 @@ Vector::iterator Vector::erase(const_iterator pos)
     for (auto i{current}; i < sz - 1; ++i)
         values[i] = values[i + 1];
     --sz;
-    return iterator{values + current, *this};
+    return iterator{values + current};
 }
 
 // todo: vector:: on operator??
@@ -332,42 +383,95 @@ Vector::difference_type operator-(const Vector::ConstIterator &lop,
     return lop.ptr - rop.ptr;
 }
 
-#pragma endregion ITERATOR
-
 #pragma region CONSTITERATOR
-Vector::ConstIterator::ConstIterator() // Returns a ConstIterator on nullptr.
-{
-    ptr = nullptr;
-}
-Vector::ConstIterator::ConstIterator(pointer ptr, const Vector &v) : ptr{ptr}, vec{v} {} // Returns a ConstIterator which sets the instance variable to ptr.
 
-Vector::ConstIterator::reference Vector::ConstIterator::operator*() const // Returns the value of the value referenced by ptr.
+// Returns a ConstIterator on nullptr.
+Vector::ConstIterator::ConstIterator() : ptr{nullptr},
+                                         dereferencable{false},
+                                         incrementable{false}
 {
-    return *ptr;
+    cout << "basic constructor ";
 }
-Vector::ConstIterator::pointer Vector::ConstIterator::operator->() const // Returns a pointer to the referenced value.
+
+// Returns a ConstIterator which sets the instance variable to ptr.
+Vector::ConstIterator::ConstIterator(pointer ptr) : ptr{ptr},
+                                                    dereferencable{true},
+                                                    incrementable{true}
+{
+    cout << "constiter single arg constructor called";
+}
+
+Vector::ConstIterator::ConstIterator(pointer ptr, bool incrementable, bool dereferencable, const Vector *vec) : ptr{ptr},
+                                                                                                                incrementable{incrementable},
+                                                                                                                dereferencable{dereferencable}
+{
+    cout << "constiter full constructor";
+}
+// to get the ptr for operator==
+Vector::ConstIterator::pointer Vector::ConstIterator::get_ptr_unsafe() const
 {
     return ptr;
 }
+
+Vector::ConstIterator::reference Vector::ConstIterator::operator*() const // Returns the value of the value referenced by ptr.
+{
+    cout << "operator* ";
+    cout << "dereferencable ";
+    cout << dereferencable;
+    cout << " incrementable ";
+    cout << incrementable;
+    if (!dereferencable)
+        throw runtime_error("constiterator is not dereferencable**");
+    return *ptr;
+}
+
+Vector::ConstIterator::pointer Vector::ConstIterator::operator->() const // Returns a pointer to the referenced value.
+{
+    cout << "operator->const  ";
+    cout << "dereferencable ";
+    cout << dereferencable;
+    cout << " incrementable ";
+    cout << incrementable;
+
+    if (!dereferencable)
+        throw runtime_error("constiterator is not dereferencable--");
+    return &*ptr;
+}
+
 bool Vector::ConstIterator::operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
 {
-    return ptr == it.operator->();
+    cout << "compare constiter ";
+    cout << "dereferencable ";
+    cout << dereferencable;
+    cout << " incrementable ";
+    cout << incrementable;
+
+    // shitty workaround to revoke `dereferencable`
+    //      actually there is none
+    //      operator-> is expected to throw on end()
+    //      i dont think there is a way to get the ptr so yes global fn would be way better
+    // return ptr == it_mut.operator->();
+    return ptr == it.get_ptr_unsafe();
 }
+
 bool Vector::ConstIterator::operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
 {
     return !this->operator==(it);
 }
+
 Vector::const_iterator &Vector::ConstIterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
 {
-    ++ptr;
+    cout << "++ constit";
+    if (incrementable)
+    {
+        ++ptr;
+    }
     return *this;
 }
+
 Vector::const_iterator Vector::ConstIterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
 {
-    // todo: research:
-    //  sufficient to return ptr or should it be a instance of the cls
-    //  class init w constructor or set value. guess constructor
-    Vector::const_iterator pre(ptr++);
+    Vector::const_iterator pre = Vector::const_iterator(incrementable ? ptr++ : ptr);
     return pre;
 }
 
