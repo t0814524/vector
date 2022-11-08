@@ -281,12 +281,14 @@ Vector::const_iterator Vector::end() const
 // Returns an iterator on nullptr.
 Vector::Iterator::Iterator() : ptr{nullptr},
                                dereferencable{false},
-                               incrementable{false} {}
+                               incrementable{false},
+                               vec{nullptr} {}
 
 // Returns an iterator which sets the instance variable to ptr.
 Vector::Iterator::Iterator(pointer ptr) : ptr{ptr},
                                           dereferencable{false},
-                                          incrementable{false}
+                                          incrementable{false},
+                                          vec{nullptr}
 {
     cout << "iter constr called";
 }
@@ -295,7 +297,8 @@ Vector::Iterator::Iterator(pointer ptr) : ptr{ptr},
 // todo: y const vector
 Vector::Iterator::Iterator(pointer ptr, bool incrementable, bool dereferencable, const Vector *vec) : ptr{ptr},
                                                                                                       incrementable{incrementable},
-                                                                                                      dereferencable{dereferencable}
+                                                                                                      dereferencable{dereferencable},
+                                                                                                      vec{vec}
 {
     cout << "iter full constr called";
 }
@@ -364,14 +367,8 @@ bool Vector::Iterator::operator!=(const const_iterator &it) const // Compares th
 Vector::iterator &Vector::Iterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
 {
 
-    // scheiss hs pointer
-    // ich will von dem vector der mit dem vec pointer mit dem iterator connected is end iterator haben und von dem dann den ptr mit dem ptr vom aktuellen iterator vergleichen.
-    // wenn die gleich sind is der iterator auf end und darf nicht dereferenzierbar sein.
-    // haett dacht so irgendwie (aber dann hauts nur orge specher errors raus wenn das aktiviert wird):
-    // if (ptr != (*vec).end().get_ptr_unsafe()) //das einkommentiern und alles is im orsch
-    //     ++ptr;
+    // actually nvm. im an idiot n never initialized the vec pointer
 
-    // auto asdf = (*vec).end();
     cout << " iter++ ";
     // cout << (*vec).end();
     cout << " ptr lft";
