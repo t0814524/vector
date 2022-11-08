@@ -114,16 +114,15 @@ public:
 
         // todo: research nested cls in cpp, is there any point in putting iter cls inside? other thatn hinting at its relation (with which its intended to be used with)
 
-        bool incrementable;
-        bool dereferencable;
-        Vector *vec;
+        const Vector *vec;
 
-        bool checkIncrementable();
+        bool checkIncrementable() const;
+        bool checkDereferencable() const;
 
     public:
-        Iterator();                                                                        // Returns an iterator on nullptr.
-        Iterator(pointer ptr);                                                             // Returns an iterator which sets the instance variable to ptr.
-        Iterator(pointer ptr, bool incrementable, bool dereferencable, const Vector *vec); // Returns a "safe" iterator with boundary and deref checks.
+        Iterator();                               // Returns an iterator on nullptr.
+        Iterator(pointer ptr);                    // Returns an iterator which sets the instance variable to ptr.
+        Iterator(pointer ptr, const Vector *vec); // Returns a "safe" iterator with boundary and deref checks.
 
         pointer get_ptr_unsafe() const;
         // todo: check if const is necessary
@@ -147,14 +146,14 @@ public:
 
     private:
         pointer ptr; // Points to an element in Vector.
-        bool incrementable;
-        bool dereferencable;
-        Vector *vec;
+        const Vector *vec;
+        bool checkIncrementable() const;
+        bool checkDereferencable() const;
 
     public:
-        ConstIterator();                                                                        // Returns a ConstIterator on nullptr.
-        ConstIterator(pointer ptr);                                                             // Returns a ConstIterator which sets the instance variable to ptr.
-        ConstIterator(pointer ptr, bool incrementable, bool dereferencable, const Vector *vec); // Returns a "safe" iterator with boundary and deref checks.
+        ConstIterator();                               // Returns a ConstIterator on nullptr.
+        ConstIterator(pointer ptr);                    // Returns a ConstIterator which sets the instance variable to ptr.
+        ConstIterator(pointer ptr, const Vector *vec); // Returns a "safe" iterator with boundary and deref checks.
 
         pointer get_ptr_unsafe() const;
         reference operator*() const;                   // Returns the value of the value referenced by ptr.
