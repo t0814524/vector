@@ -226,17 +226,10 @@ Vector<value_type>::Vector()
 template <typename value_type>
 Vector<value_type>::Vector(Vector<value_type>::size_type n)
 {
-    sz = 0;       // number of elements in the Vector
-    max_size = n; // maximum number of elements that are possible (capacity of the Vector)
+    sz = 0; // number of elements in the Vector
 
-    if (n == 0)
-    {
-        values = new value_type[1]; // pointer to array with the values
-    }
-    else
-    {
-        values = new value_type[max_size]; // pointer to array with the values
-    }
+    max_size = n == 0 ? 1 : n;
+    values = new value_type[max_size]; // pointer to array with the values
 }
 
 // Returns a Vector with specified content.
@@ -480,19 +473,13 @@ Vector<value_type>::Iterator::Iterator() : ptr{nullptr},
 // Returns an iterator which sets the instance variable to ptr.
 template <typename value_type>
 Vector<value_type>::Iterator::Iterator(pointer ptr) : ptr{ptr},
-                                                      vec{nullptr}
-{
-    cout << "iter constr called";
-}
+                                                      vec{nullptr} {}
 
 // Returns a "safe" iterator with boundary and deref checks.
 // todo: y const vector
 template <typename value_type>
 Vector<value_type>::Iterator::Iterator(pointer ptr, const Vector *vec) : ptr{ptr},
-                                                                         vec{vec}
-{
-    cout << "iter full constr called";
-}
+                                                                         vec{vec} {}
 
 // to get the ptr for internal fns (==, boundary checks)
 template <typename value_type>
@@ -608,25 +595,16 @@ typename Vector<value_type>::iterator Vector<value_type>::erase(const_iterator p
 // Returns a ConstIterator on nullptr.
 template <typename value_type>
 Vector<value_type>::ConstIterator::ConstIterator() : ptr{nullptr},
-                                                     vec{nullptr}
-{
-    cout << "basic constructor ";
-}
+                                                     vec{nullptr} {}
 
 // Returns a ConstIterator which sets the instance variable to ptr.
 template <typename value_type>
 Vector<value_type>::ConstIterator::ConstIterator(pointer ptr) : ptr{ptr},
-                                                                vec{nullptr}
-{
-    cout << "constiter single arg constructor called";
-}
+                                                                vec{nullptr} {}
 
 template <typename value_type>
 Vector<value_type>::ConstIterator::ConstIterator(pointer ptr, const Vector *vec) : ptr{ptr},
-                                                                                   vec{vec}
-{
-    cout << "constiter full constructor";
-}
+                                                                                   vec{vec} {}
 // to get the ptr for internal fns (==, boundary checks)
 template <typename value_type>
 typename Vector<value_type>::ConstIterator::pointer Vector<value_type>::ConstIterator::get_ptr_unsafe() const
