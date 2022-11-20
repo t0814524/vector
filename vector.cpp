@@ -19,7 +19,8 @@
 #include <stdexcept>
 #include <string>
 
-value_type *copy_array(value_type *arr, size_t old_size, size_t new_size)
+template <class value_type>
+value_type *copy_array(value_type *arr, typename Vector<value_type>::size_type old_size, typename Vector<value_type>::size_type new_size)
 {
     value_type *new_arr = new value_type[new_size];
 
@@ -34,7 +35,8 @@ value_type *copy_array(value_type *arr, size_t old_size, size_t new_size)
 
 #pragma region CONSTRUCTORS
 // default
-Vector::Vector()
+template <class value_type>
+Vector<value_type>::Vector()
 {
     sz = 0;
     max_size = 1;
@@ -42,7 +44,8 @@ Vector::Vector()
 }
 
 // init with size n
-Vector::Vector(size_t n)
+template <class value_type>
+Vector<value_type>::Vector(Vector<value_type>::size_type n)
 {
     sz = 0;       // number of elements in the Vector
     max_size = n; // maximum number of elements that are possible (capacity of the Vector)
@@ -58,7 +61,8 @@ Vector::Vector(size_t n)
 }
 
 // Returns a Vector with specified content.
-Vector::Vector(std::initializer_list<value_type> list)
+template <class value_type>
+Vector<value_type>::Vector(std::initializer_list<value_type> list)
 {
     sz = max_size = list.size();
     values = new value_type[max_size]; // pointer to array with the values
@@ -83,14 +87,16 @@ Vector::Vector(std::initializer_list<value_type> list)
 }
 
 // copy
-Vector::Vector(const Vector &v)
+template <class value_type>
+Vector<value_type>::Vector(const Vector &v)
 {
     sz = v.sz;             // number of elements in the Vector
     max_size = v.max_size; // maximum number of elements that are possible (capacity of the Vector)
     values = copy_array(v.values, sz, max_size);
 }
 
-Vector::~Vector()
+template <class value_type>
+Vector<value_type>::~Vector()
 {
     delete[] values;
 }
@@ -99,17 +105,20 @@ Vector::~Vector()
 
 #pragma region METHODS
 
-size_t Vector::size() const // Returns number of saved elements.
+template <class value_type>
+typename Vector<value_type>::size_type Vector<value_type>::size() const // Returns number of saved elements.
 {
     return sz;
 }
 
-bool Vector::empty() const // Returns true if the Vector is empty, otherwise false.
+template <class value_type>
+bool Vector<value_type>::empty() const // Returns true if the Vector is empty, otherwise false.
 {
     return (sz == 0);
 }
 
-void Vector::clear() // Deletes all elements from Vector.
+template <class value_type>
+void Vector<value_type>::clear() // Deletes all elements from Vector.
 {
     sz = 0;
     // info:
@@ -120,7 +129,8 @@ void Vector::clear() // Deletes all elements from Vector.
     // values = new value_type[max_size];
 }
 
-void Vector::reserve(size_t n) // Capacity of the Vector is increased to n if it is not already at least this large.
+template <class value_type>
+void Vector<value_type>::reserve(Vector<value_type>::size_type n) // Capacity of the Vector is increased to n if it is not already at least this large.
 {
     if (max_size < n)
     {
@@ -131,7 +141,8 @@ void Vector::reserve(size_t n) // Capacity of the Vector is increased to n if it
     }
 }
 
-void Vector::shrink_to_fit() // Capacity is reduced to number of elements.
+template <class value_type>
+void Vector<value_type>::shrink_to_fit() // Capacity is reduced to number of elements.
 {
     if (sz < max_size)
     {
@@ -142,19 +153,22 @@ void Vector::shrink_to_fit() // Capacity is reduced to number of elements.
     }
 }
 
-size_t Vector::capacity() const // Returns current capacity of the Vector.
+template <class value_type>
+typename Vector<value_type>::size_type Vector<value_type>::capacity() const // Returns current capacity of the Vector.
 {
     return max_size;
 }
 
-void Vector::pop_back() // Removes the last element in the Vector. Throws an std::runtime_error exception if the Vector was empty.
+template <class value_type>
+void Vector<value_type>::pop_back() // Removes the last element in the Vector. Throws an std::runtime_error exception if the Vector was empty.
 {
     if (sz <= 0)
         throw runtime_error("can't use pop_back on empty vector");
     sz = sz - 1;
 }
 
-void Vector::push_back(value_type x)
+template <class value_type>
+void Vector<value_type>::push_back(value_type x)
 {
     // expand arr
     if (max_size == sz)
@@ -169,14 +183,16 @@ void Vector::push_back(value_type x)
     sz++;
 }
 
-value_type &Vector::operator[](size_t index) // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
+template <class value_type>
+value_type &Vector<value_type>::operator[](Vector<value_type>::size_type index) // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
 {
     if (index < 0 || index >= sz)
         throw runtime_error(string("index: ") + std::to_string(index) + string(" out of bounds, size is: ") + std::to_string(sz));
     return values[index];
 }
 
-const double &Vector::operator[](size_t index) const // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
+template <class value_type>
+const value_type &Vector<value_type>::operator[](Vector<value_type>::size_type index) const // Returns the element at the given position (index). If index is out of bounds, throws an std::runtime_error exception
 {
     if (index < 0 || index >= sz)
         throw runtime_error(string("index: ") + std::to_string(index) + string(" out of bounds, size is: ") + std::to_string(sz));
@@ -184,7 +200,8 @@ const double &Vector::operator[](size_t index) const // Returns the element at t
 }
 
 // copy assignment overload
-const Vector &Vector::operator=(const Vector &other)
+template <class value_type>
+const Vector<value_type> &Vector<value_type>::operator=(const Vector &other)
 {
     // no self assignment
     if (this != &other)
@@ -196,7 +213,8 @@ const Vector &Vector::operator=(const Vector &other)
     return *this;
 }
 
-ostream &Vector::print(ostream &o) const
+template <class value_type>
+ostream &Vector<value_type>::print(ostream &o) const
 {
     // ostream &temp = "";
     o << "[";
@@ -214,13 +232,17 @@ ostream &Vector::print(ostream &o) const
 }
 
 // output
-ostream &operator<<(ostream &o, const Vector &v)
+
+template <class value_type>
+ostream &operator<<(ostream &o, const Vector<value_type> &v)
 {
     return v.print(o);
 }
 
 #pragma endregion METHODS
-Vector::iterator Vector::begin()
+
+template <class value_type>
+typename Vector<value_type>::iterator Vector<value_type>::begin()
 {
     bool inc = true;
     bool deref = true;
@@ -233,12 +255,14 @@ Vector::iterator Vector::begin()
     return iterator(values, this);
 }
 
-Vector::iterator Vector::end()
+template <class value_type>
+typename Vector<value_type>::iterator Vector<value_type>::end()
 {
     return iterator(values + sz, this);
 }
 
-Vector::const_iterator Vector::begin() const
+template <class value_type>
+typename Vector<value_type>::const_iterator Vector<value_type>::begin() const
 {
     // todo: y does that count as Iterator
     // return values;
@@ -261,7 +285,8 @@ Vector::const_iterator Vector::begin() const
     // return const_iterator(values, (sz > 0), inc, this);
 }
 
-Vector::const_iterator Vector::end() const
+template <class value_type>
+typename Vector<value_type>::const_iterator Vector<value_type>::end() const
 {
     return const_iterator(values + sz, this);
 }
@@ -269,42 +294,49 @@ Vector::const_iterator Vector::end() const
 #pragma region ITERATOR
 
 // Returns an iterator on nullptr.
-Vector::Iterator::Iterator() : ptr{nullptr},
-                               vec{nullptr} {}
+template <class value_type>
+Vector<value_type>::Iterator::Iterator() : ptr{nullptr},
+                                           vec{nullptr} {}
 
 // Returns an iterator which sets the instance variable to ptr.
-Vector::Iterator::Iterator(pointer ptr) : ptr{ptr},
-                                          vec{nullptr}
+template <class value_type>
+Vector<value_type>::Iterator::Iterator(pointer ptr) : ptr{ptr},
+                                                      vec{nullptr}
 {
     cout << "iter constr called";
 }
 
 // Returns a "safe" iterator with boundary and deref checks.
 // todo: y const vector
-Vector::Iterator::Iterator(pointer ptr, const Vector *vec) : ptr{ptr},
-                                                             vec{vec}
+template <class value_type>
+Vector<value_type>::Iterator::Iterator(pointer ptr, const Vector *vec) : ptr{ptr},
+                                                                         vec{vec}
 {
     cout << "iter full constr called";
 }
 
 // to get the ptr for internal fns (==, boundary checks)
-Vector::Iterator::pointer Vector::Iterator::get_ptr_unsafe() const
+template <class value_type>
+typename Vector<value_type>::Iterator::pointer Vector<value_type>::Iterator::get_ptr_unsafe() const
 {
     return ptr;
 }
 
-bool Vector::Iterator::checkIncrementable() const
+template <class value_type>
+bool Vector<value_type>::Iterator::checkIncrementable() const
 {
     return (vec != nullptr) && (ptr != vec->end().get_ptr_unsafe());
 }
 
-bool Vector::Iterator::checkDereferencable() const
+template <class value_type>
+bool Vector<value_type>::Iterator::checkDereferencable() const
 {
     return vec != nullptr && ptr != vec->end().get_ptr_unsafe();
 }
 
 // todo: check if const is necessary
-Vector::Iterator::reference Vector::Iterator::operator*() const // Returns the value of the value referenced by ptr.
+template <class value_type>
+typename Vector<value_type>::Iterator::reference Vector<value_type>::Iterator::operator*() const // Returns the value of the value referenced by ptr.
 {
     // if (!dereferencable)
     //     throw runtime_error("iterator is not dereferencable");
@@ -313,24 +345,28 @@ Vector::Iterator::reference Vector::Iterator::operator*() const // Returns the v
     return *ptr;
 }
 // should throw on end (utest_secure_iterators 63)
-Vector::Iterator::pointer Vector::Iterator::operator->() const // Returns a pointer to the referenced value.
+template <class value_type>
+typename Vector<value_type>::Iterator::pointer Vector<value_type>::Iterator::operator->() const // Returns a pointer to the referenced value.
 {
     if (!checkIncrementable())
         throw runtime_error("iterator is not dereferencable");
     return ptr;
 }
 
-bool Vector::Iterator::operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
+template <class value_type>
+bool Vector<value_type>::Iterator::operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
 {
     return ptr == it.get_ptr_unsafe();
 }
 
-bool Vector::Iterator::operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
+template <class value_type>
+bool Vector<value_type>::Iterator::operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
 {
     return !this->operator==(it);
 }
 
-Vector::iterator &Vector::Iterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
+template <class value_type>
+typename Vector<value_type>::iterator &Vector<value_type>::Iterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
 {
     if (checkIncrementable())
     {
@@ -343,21 +379,24 @@ Vector::iterator &Vector::Iterator::operator++() // (Prefix) Iterator points to 
     return *this;
 }
 
-Vector::iterator Vector::Iterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
+template <class value_type>
+typename Vector<value_type>::iterator Vector<value_type>::Iterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
 {
-    Vector::iterator pre = checkIncrementable() ? Vector::iterator(ptr++, vec) : *this;
+    Vector<value_type>::iterator pre = checkIncrementable() ? Vector<value_type>::iterator(ptr++, vec) : *this;
     return pre;
 }
 
 // todo: vecror::???
-Vector::Iterator::operator Vector::const_iterator() const // (Type conversion) Allows to convert Iterator to ConstIterator
+template <class value_type>
+Vector<value_type>::Iterator::operator typename Vector<value_type>::const_iterator() const // (Type conversion) Allows to convert Iterator to ConstIterator
 {
     return ConstIterator(ptr, vec);
 }
 
 #pragma endregion ITERATOR
 
-Vector::iterator Vector::insert(const_iterator pos, const_reference val)
+template <class value_type>
+typename Vector<value_type>::iterator typename Vector<value_type>::insert(const_iterator pos, const_reference val)
 {
     auto diff = pos - begin();
     if (diff < 0 || static_cast<size_type>(diff) > sz)
@@ -372,7 +411,8 @@ Vector::iterator Vector::insert(const_iterator pos, const_reference val)
     return iterator{values + current, this};
 }
 
-Vector::iterator Vector::erase(const_iterator pos)
+template <class value_type>
+typename Vector<value_type>::iterator Vector<value_type>::erase(const_iterator pos)
 {
     auto diff = pos - begin();
     if (diff < 0 || static_cast<size_type>(diff) >= sz)
@@ -385,8 +425,9 @@ Vector::iterator Vector::erase(const_iterator pos)
 }
 
 // todo: vector:: on operator??
-Vector::difference_type operator-(const Vector::ConstIterator &lop,
-                                  const Vector::ConstIterator &rop)
+template <class value_type>
+typename Vector<value_type>::difference_type operator-(const typename Vector<value_type>::ConstIterator &lop,
+                                                       const typename Vector<value_type>::ConstIterator &rop)
 {
     return lop.ptr - rop.ptr;
 }
@@ -394,60 +435,70 @@ Vector::difference_type operator-(const Vector::ConstIterator &lop,
 #pragma region CONSTITERATOR
 
 // Returns a ConstIterator on nullptr.
-Vector::ConstIterator::ConstIterator() : ptr{nullptr},
-                                         vec{nullptr}
+template <class value_type>
+Vector<value_type>::ConstIterator::ConstIterator() : ptr{nullptr},
+                                                     vec{nullptr}
 {
     cout << "basic constructor ";
 }
 
 // Returns a ConstIterator which sets the instance variable to ptr.
-Vector::ConstIterator::ConstIterator(pointer ptr) : ptr{ptr},
-                                                    vec{nullptr}
+template <class value_type>
+Vector<value_type>::ConstIterator::ConstIterator(pointer ptr) : ptr{ptr},
+                                                                vec{nullptr}
 {
     cout << "constiter single arg constructor called";
 }
 
-Vector::ConstIterator::ConstIterator(pointer ptr, const Vector *vec) : ptr{ptr},
-                                                                       vec{vec}
+template <class value_type>
+Vector<value_type>::ConstIterator::ConstIterator(pointer ptr, const Vector *vec) : ptr{ptr},
+                                                                                   vec{vec}
 {
     cout << "constiter full constructor";
 }
 // to get the ptr for internal fns (==, boundary checks)
-Vector::ConstIterator::pointer Vector::ConstIterator::get_ptr_unsafe() const
+template <class value_type>
+typename Vector<value_type>::ConstIterator::pointer Vector<value_type>::ConstIterator::get_ptr_unsafe() const
 {
     return ptr;
 }
 
-bool Vector::ConstIterator::checkIncrementable() const
+template <class value_type>
+bool Vector<value_type>::ConstIterator::checkIncrementable() const
 {
     return vec != nullptr && ptr != vec->end().get_ptr_unsafe();
 }
 
-Vector::ConstIterator::reference Vector::ConstIterator::operator*() const // Returns the value of the value referenced by ptr.
+template <class value_type>
+typename Vector<value_type>::ConstIterator::reference Vector<value_type>::ConstIterator::operator*() const // Returns the value of the value referenced by ptr.
 {
     if (!checkIncrementable())
         throw runtime_error("constiterator is not dereferencable**");
     return *ptr;
 }
 
-Vector::ConstIterator::pointer Vector::ConstIterator::operator->() const // Returns a pointer to the referenced value.
+template <class value_type>
+typename Vector<value_type>::ConstIterator::pointer Vector<value_type>::ConstIterator::operator->() const // Returns a pointer to the referenced value.
 {
     if (!checkIncrementable())
         throw runtime_error("constiterator is not dereferencable--");
     return &*ptr;
 }
 
-bool Vector::ConstIterator::operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
+template <class value_type>
+bool Vector<value_type>::ConstIterator::operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
 {
     return ptr == it.get_ptr_unsafe();
 }
 
-bool Vector::ConstIterator::operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
+template <class value_type>
+bool Vector<value_type>::ConstIterator::operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
 {
     return !this->operator==(it);
 }
 
-Vector::const_iterator &Vector::ConstIterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
+template <class value_type>
+typename Vector<value_type>::const_iterator &Vector<value_type>::ConstIterator::operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
 {
     if (checkIncrementable())
     {
@@ -456,9 +507,10 @@ Vector::const_iterator &Vector::ConstIterator::operator++() // (Prefix) Iterator
     return *this;
 }
 
-Vector::const_iterator Vector::ConstIterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
+template <class value_type>
+typename Vector<value_type>::const_iterator Vector<value_type>::ConstIterator::operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
 {
-    Vector::const_iterator pre = checkIncrementable() ? Vector::const_iterator(ptr++, vec) : *this;
+    Vector<value_type>::const_iterator pre = checkIncrementable() ? Vector<value_type>::const_iterator(ptr++, vec) : *this;
     return pre;
 }
 
