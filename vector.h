@@ -8,8 +8,6 @@
 #include <iostream>
 using namespace std;
 
-// using value_type = double; // this will make it easier to transition to templates
-
 template <typename value_type>
 class Vector
 {
@@ -53,14 +51,14 @@ public:
     Vector(size_type n)
     {
         sz = 0; // number of elements in the Vector
-
         max_size = n == 0 ? 1 : n;
         values = new value_type[max_size]; // pointer to array with the values
     }
     // Returns a Vector with specified content.
     Vector(std::initializer_list<value_type> list)
     {
-        sz = max_size = list.size();
+        sz = list.size();
+        max_size = sz == 0 ? 1 : sz;
         values = new value_type[max_size]; // pointer to array with the values
 
         int i = 0;
@@ -187,7 +185,6 @@ public:
 
     ostream &print(ostream &o) const
     {
-        // ostream &temp = "";
         o << "[";
         for (int i = 0; i < sz; ++i)
         {
@@ -206,15 +203,6 @@ public:
 
     iterator begin()
     {
-        // todo: not used
-        bool inc = true;
-        bool deref = true;
-        // empty vector
-        if (sz == 0)
-        {
-            deref = false;
-            inc = false;
-        }
         return iterator(values, this);
     }
 
@@ -228,22 +216,7 @@ public:
         // todo: y does that count as Iterator
         // return values;
 
-        // info:
-        // initialize w `=` instead of bracket syntax
-        //  gets optimized, actually compared the assembly and its the same
-        //  i just hate how `{}` looks and know how `=` behaves
-        bool inc = true;
-        bool deref = true;
-        // empty vector
-        if (sz == 0)
-        {
-            deref = false;
-            inc = false;
-        } // todotodo: remove that shit
-
         return const_iterator(values, this);
-
-        // return const_iterator(values, (sz > 0), inc, this);
     }
 
     const_iterator end() const
@@ -327,10 +300,6 @@ public:
 
         const Vector *vec;
 
-        bool checkDereferencable() const
-        {
-            return vec != nullptr && ptr != vec->end().get_ptr_unsafe();
-        }
         bool checkIncrementable() const
         {
             return (vec != nullptr) && (ptr != vec->end().get_ptr_unsafe());
@@ -365,7 +334,7 @@ public:
                 throw runtime_error("end is not dereferencable");
             return *ptr;
         }
-        // should throw on end (utest_secure_iterators 63)
+
         pointer operator->() const // Returns a pointer to the referenced value.
         {
             if (!checkIncrementable())
@@ -402,7 +371,6 @@ public:
             return pre;
         }
 
-        // todo: vecror::???
         operator const_iterator() const // (Type conversion) Allows to convert Iterator to ConstIterator
         {
             return ConstIterator(ptr, vec);
@@ -425,7 +393,6 @@ public:
         {
             return vec != nullptr && ptr != vec->end().get_ptr_unsafe();
         }
-        bool checkDereferencable() const;
 
     public:
         // Returns a ConstIterator on nullptr.
