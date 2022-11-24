@@ -1,2 +1,7 @@
 main.exe
 .vscode
+utest_3.exe
+utest_3.obj
+utest_secure_iterators.exe
+utest_secure_iterators.obj
+vector.obj
