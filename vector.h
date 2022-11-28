@@ -83,12 +83,15 @@
 using namespace std;
 
 template <typename T>
+
 class Vector
 {
     // iterator stuff
 public:
     class ConstIterator;
     class Iterator;
+    class IteratorA;
+    class IteratorB;
     using value_type = T;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
@@ -107,6 +110,19 @@ private:
     // static constexpr size_t min_sz; // allowed but not required by this exercise to define min size. allowing empty vec has pros and cons and its up to me
 
 public:
+    template <typename value_type>
+    value_type *copy_array(value_type *arr, typename Vector<value_type>::size_type old_size, typename Vector<value_type>::size_type new_size)
+    {
+        value_type *new_arr = new value_type[new_size];
+
+        for (typename Vector<value_type>::size_type i = 0; i < old_size; ++i)
+        {
+            {
+                new_arr[i] = arr[i];
+            }
+        }
+        return new_arr;
+    }
     // default
     Vector()
     {
@@ -272,6 +288,26 @@ public:
         return iterator(values + sz, this);
     }
 
+    IteratorA begin_a() const
+    {
+        return IteratorA(values + sz - 1, this);
+    }
+
+    IteratorA end_a() const
+    {
+        return IteratorA(values - 1, this);
+    }
+
+    IteratorB begin_b() const
+    {
+        return IteratorB(values, this);
+    }
+
+    IteratorB end_b() const
+    {
+        return IteratorB(values + sz, this);
+    }
+
     const_iterator begin() const
     {
         return const_iterator(values, this);
@@ -308,6 +344,179 @@ public:
         --sz;
         return iterator{values + current, this};
     }
+
+    class IteratorA
+    {
+    public:
+        using value_type = Vector::value_type;
+        using reference = Vector::reference;
+        using pointer = Vector::pointer;
+        using difference_type = Vector::difference_type;
+        using iterator_category = std::forward_iterator_tag;
+
+    private:
+        pointer ptr; // Points to an element in Vector.
+
+        const Vector *vec;
+
+        bool check_deref_inc() const
+        {
+            return (vec != nullptr) && (ptr != vec->end_a().get_ptr_unsafe());
+        }
+
+    public:
+        // Returns an iterator on nullptr.
+        IteratorA() : ptr{nullptr},
+                      vec{nullptr} {}
+
+        // Returns an iterator which sets the instance variable to ptr.
+        IteratorA(pointer ptr) : ptr{ptr},
+                                 vec{nullptr} {}
+
+        // Returns a "safe" iterator with boundary and deref checks.
+        IteratorA(pointer ptr, const Vector *vec) : ptr{ptr},
+                                                    vec{vec} {}
+
+        // to get the ptr for internal fns (==, boundary checks)
+        pointer get_ptr_unsafe() const
+        {
+            return ptr;
+        }
+
+        reference operator*() const // Returns the value of the value referenced by ptr.
+        {
+            if (!check_deref_inc())
+                throw runtime_error("end is not dereferencable");
+            return *ptr;
+        }
+
+        pointer operator->() const // Returns a pointer to the referenced value.
+        {
+            if (!check_deref_inc())
+                throw runtime_error("iterator is not dereferencable");
+            return ptr;
+        }
+
+        bool operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
+        {
+            return ptr == it.get_ptr_unsafe();
+        }
+
+        bool operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
+        {
+            return !this->operator==(it);
+        }
+
+        IteratorA &operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
+        {
+            if (check_deref_inc())
+            {
+                --ptr;
+            }
+            // utest expects no increment and no throw
+            // else
+            //     throw runtime_error("ptr not incrementable");
+
+            return *this;
+        }
+
+        iterator operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
+        {
+            iterator pre = check_deref_inc() ? iterator(ptr++, vec) : *this;
+            return pre;
+        }
+
+        operator const_iterator() const // (Type conversion) Allows to convert Iterator to ConstIterator
+        {
+            return ConstIterator(ptr, vec);
+        }
+    };
+    class IteratorB
+    {
+    public:
+        using value_type = Vector::value_type;
+        using reference = Vector::reference;
+        using pointer = Vector::pointer;
+        using difference_type = Vector::difference_type;
+        using iterator_category = std::forward_iterator_tag;
+
+    private:
+        pointer ptr; // Points to an element in Vector.
+
+        const Vector *vec;
+
+        bool check_deref_inc() const
+        {
+            return (vec != nullptr) && (ptr != vec->end_b().get_ptr_unsafe());
+        }
+
+    public:
+        // Returns an iterator on nullptr.
+        IteratorB() : ptr{nullptr},
+                      vec{nullptr} {}
+
+        // Returns an iterator which sets the instance variable to ptr.
+        IteratorB(pointer ptr) : ptr{ptr},
+                                 vec{nullptr} {}
+
+        // Returns a "safe" iterator with boundary and deref checks.
+        IteratorB(pointer ptr, const Vector *vec) : ptr{ptr},
+                                                    vec{vec} {}
+
+        // to get the ptr for internal fns (==, boundary checks)
+        pointer get_ptr_unsafe() const
+        {
+            return ptr;
+        }
+
+        reference operator*() const // Returns the value of the value referenced by ptr.
+        {
+            if (!check_deref_inc())
+                throw runtime_error("end is not dereferencable");
+            return *ptr;
+        }
+
+        pointer operator->() const // Returns a pointer to the referenced value.
+        {
+            if (!check_deref_inc())
+                throw runtime_error("iterator is not dereferencable");
+            return ptr;
+        }
+
+        bool operator==(const const_iterator &it) const // Compares the pointers for equality. (A global function may be a better choice).
+        {
+            return ptr == it.get_ptr_unsafe();
+        }
+
+        bool operator!=(const const_iterator &it) const // Compares the pointers for inequality. (A global function may be a better choice).
+        {
+            return !this->operator==(it);
+        }
+
+        IteratorB &operator++() // (Prefix) Iterator points to next element and (a reference to it) is returned.
+        {
+            if (check_deref_inc())
+            {
+                ++ptr;
+            }
+            // utest expects no increment and no throw
+            // else
+            //     throw runtime_error("ptr not incrementable");
+
+            return *this;
+        }
+
+        iterator operator++(int) // (Postfix) Iterator points to next element. Copy of iterator before increment is returned.
+        {
+            iterator pre = check_deref_inc() ? iterator(ptr++, vec) : *this;
+            return pre;
+        }
+
+        operator const_iterator() const // (Type conversion) Allows to convert Iterator to ConstIterator
+        {
+            return ConstIterator(ptr, vec);
+        }
+    };
 
     class Iterator
     {
@@ -481,20 +690,6 @@ template <typename value_type>
 ostream &operator<<(ostream &o, const Vector<value_type> &v)
 {
     return v.print(o);
-}
-
-template <typename value_type>
-value_type *copy_array(value_type *arr, typename Vector<value_type>::size_type old_size, typename Vector<value_type>::size_type new_size)
-{
-    value_type *new_arr = new value_type[new_size];
-
-    for (typename Vector<value_type>::size_type i = 0; i < old_size; ++i)
-    {
-        {
-            new_arr[i] = arr[i];
-        }
-    }
-    return new_arr;
 }
 
 #endif // _CUSTOM_VECTOR_
